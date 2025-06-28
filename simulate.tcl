@@ -16,15 +16,19 @@ create_project ${PROJ_NAME} ${PROJ_DIR} -part xc7z020clg400-1 -force
 # Add all necessary source files using relative paths from the project root.
 add_files -fileset sim_1 [list \
     ./src/header/defines.sv \
-    ./src/3.Execute_Stage/alu.sv \
-    ./testbench/3.Execute_Stage/tb_alu.sv \
+    ./src/3.Execute_Stage/module/alu.sv \
+    ./src/3.Execute_Stage/module/alu_control_unit.sv \
+    ./src/3.Execute_Stage/execute_stage.sv \
+    ./testbench/3.Execute_Stage/module/tb_alu.sv \
+    ./testbench/3.Execute_Stage/module/tb_alu_control_unit.sv \
+    ./testbench/3.Execute_Stage/tb_execute_stage.sv \
 ]
 
 #add_files -fileset sim_1 -norecurse ./src/program.mem
 
 # --- 3. Set Compile Order ---
 # Explicitly set the defines package to be compiled first.
-set_property top tb_alu [get_filesets sim_1]
+set_property top tb_execute_stage [get_filesets sim_1]
 update_compile_order -fileset sim_1
 
 

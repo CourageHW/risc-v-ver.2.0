@@ -20,19 +20,21 @@ module alu_control_unit (
       ALUOP_RTYPE   : begin
         unique case (alu_ctrl_funct3_i)
           FUNCT3_ADD_SUB : begin
-            if      (alu_ctrl_funct7_i == ALU_ADD) ALUSel_o = ALU_ADD;
-            else if (alu_ctrl_funct7_i == ALU_SUB) ALUSel_o = ALU_SUB;
+            if      (alu_ctrl_funct7_i == FUNCT7_ADD) ALUSel_o = ALU_ADD;
+            else if (alu_ctrl_funct7_i == FUNCT7_SUB) ALUSel_o = ALU_SUB;
           end
 
           FUNCT3_SRL_SRA : begin
-            if      (alu_ctrl_funct7_i == ALU_SRL) ALUSel_o = ALU_SRL;
-            else if (alu_ctrl_funct7_i == ALU_SRA) ALUSel_o = ALU_SRA;
+            if      (alu_ctrl_funct7_i == FUNCT7_SRL) ALUSel_o = ALU_SRL;
+            else if (alu_ctrl_funct7_i == FUNCT7_SRA) ALUSel_o = ALU_SRA;
           end
 
           FUNCT3_SLL     : ALUSel_o = ALU_SLL;
           FUNCT3_SLT     : ALUSel_o = ALU_SLT;
           FUNCT3_SLTU    : ALUSel_o = ALU_SLTU;
           FUNCT3_XOR     : ALUSel_o = ALU_XOR;
+          FUNCT3_AND     : ALUSel_o = ALU_AND;
+          FUNCT3_OR      : ALUSel_o = ALU_OR;
           default        : ALUSel_o = ALU_X;
         endcase
       end
@@ -44,9 +46,11 @@ module alu_control_unit (
           FUNCT3_SLT     : ALUSel_o = ALU_SLT;  // slti
           FUNCT3_SLTU    : ALUSel_o = ALU_SLTU; // sltiu
           FUNCT3_XOR     : ALUSel_o = ALU_XOR;  // xori
+          FUNCT3_AND     : ALUSel_o = ALU_AND;
+          FUNCT3_OR      : ALUSel_o = ALU_OR;
           FUNCT3_SRL_SRA : begin
-            if      (alu_ctrl_funct7_i == ALU_SRL) ALUSel_o = ALU_SRL; // srli
-            else if (alu_ctrl_funct7_i == ALU_SRA) ALUSel_o = ALU_SRA; // srai
+            if      (alu_ctrl_funct7_i == FUNCT7_SRL) ALUSel_o = ALU_SRL; // srli
+            else if (alu_ctrl_funct7_i == FUNCT7_SRA) ALUSel_o = ALU_SRA; // srai
           end
           default        : ALUSel_o = ALU_X;
         endcase
