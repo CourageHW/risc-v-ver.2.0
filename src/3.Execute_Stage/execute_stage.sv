@@ -53,8 +53,8 @@ module execute_stage (
   assign EX_alu_ctrl_funct7_w = EX_instruction_i[30];
 
   alu_control_unit alu_ctrl_inst (
-    .alu_ctrl_funct3_i(EX_alu_ctrl_funct3_i),
-    .alu_ctrl_funct7_i(EX_alu_ctrl_funct7_i),
+    .alu_ctrl_funct3_i(EX_alu_ctrl_funct3_w),
+    .alu_ctrl_funct7_i(EX_alu_ctrl_funct7_w),
     .ALUOp_i(EX_ALUOp_i),
     .ALUSel_o(EX_ALUSel_w)
   );

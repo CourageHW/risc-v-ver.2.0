@@ -1,11 +1,13 @@
--v /home/yonggi/Project_verilog/risc-v-ver.2/src/header/defines.sv
+-v /home/yonggi/Project_verilog/risc-v-ver.2/testbench/tb_riscv_core.sv
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/0.Pipeline_Register
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/2.Decode_Stage
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/2.Decode_Stage/module
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/3.Execute_Stage
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/3.Execute_Stage/module
-+incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/4.Memory_Stage/module
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/4.Memory_Stage
++incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/4.Memory_Stage/module
++incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/5.WriteBack_Stage/module
++incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/5.WriteBack_Stage
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/header
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench/2.Decode_Stage/module
@@ -14,15 +16,16 @@
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench/3.Execute_Stage
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench/4.Memory_Stage/module
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench
-+incdir+/home/yonggi/Project_verilog/risc-v-ver.2/vivado_debug_project/data_memory_debug.sim/sim_1/behav/xsim
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/vivado_sim_project/riscv_simulation.sim/sim_1/behav/xsim
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/0.Pipeline_Register
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/2.Decode_Stage
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/2.Decode_Stage/module
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/3.Execute_Stage
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/3.Execute_Stage/module
-+incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/4.Memory_Stage/module
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/4.Memory_Stage
++incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/4.Memory_Stage/module
++incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/5.WriteBack_Stage/module
++incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/5.WriteBack_Stage
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/header
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench/2.Decode_Stage/module
@@ -31,5 +34,4 @@
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench/3.Execute_Stage
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench/4.Memory_Stage/module
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench
-+incdir+/home/yonggi/Project_verilog/risc-v-ver.2/vivado_debug_project/data_memory_debug.sim/sim_1/behav/xsim
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/vivado_sim_project/riscv_simulation.sim/sim_1/behav/xsim

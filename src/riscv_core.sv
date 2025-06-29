@@ -6,12 +6,8 @@ module riscv_core (
   input logic clk,
   input logic rst_n,
   input logic [DATA_WIDTH-1:0] instruction_i, // 테스트용
-  input logic [DATA_WIDTH-1:0] pc_i, // 테스트용
-  input logic WB_we,
-  input logic [ADDR_WIDTH-1:0] WB_wr_addr,
-  input logic [DATA_WIDTH-1:0] WB_wr_data,
+  input logic [DATA_WIDTH-1:0] pc_i // 테스트용
 
-  output logic alu_zeroFlag_o // 테스트용
   );
 
 
@@ -33,9 +29,12 @@ module riscv_core (
   logic [DATA_WIDTH-1:0] ID_pc_plus4_w, EX_pc_plus4_w, MEM_pc_plus4_w, WB_pc_plus4_w;
   logic [DATA_WIDTH-1:0] EX_alu_result_w, MEM_alu_result_w, WB_alu_result_w;
   logic [DATA_WIDTH-1:0] MEM_rd_addr_w;
+  logic [DATA_WIDTH-1:0] MEM_rd_data2_w;
   logic [DATA_WIDTH-1:0] MEM_wr_data_w;
   logic [DATA_WIDTH-1:0] MEM_rd_data_w, WB_rd_data_w;
-
+  logic [DATA_WIDTH-1:0] WB_writeback_data_w;
+  
+  logic [4:0] WB_wr_addr_w;
 
   // =============================================== //
   //                   ID Stage                      //
@@ -43,6 +42,7 @@ module riscv_core (
 
   assign ID_pc_w = pc_i; // 테스트용
   assign ID_pc_plus4_w = ID_pc_w + 32'd4; // 테스트용
+  assign WB_wr_addr_w = WB_instruction_w[11:7];
 
   decode_stage decode_stage_inst (
     // --- 입력 포트 ---
@@ -50,10 +50,9 @@ module riscv_core (
     .rst_n(rst_n),                  // 공통 리셋
     .ID_instruction_i(instruction_i), // IF/ID 파이프라인 레지스터로부터 온 명령어
 
-    // Write-Back 단계로부터 오는 신호 (테스트 및 실제 동작용)
-    .WB_we_i(WB_we),
-    .WB_wr_addr_i(WB_wr_addr),
-    .WB_wr_data_i(WB_wr_data),
+    .WB_we_i(WB_RegWrite_w),
+    .WB_wr_addr_i(WB_wr_addr_w),
+    .WB_wr_data_i(WB_writeback_data_w),
 
     // --- 출력 포트 ---
     // 제어 신호 -> ID/EX 파이프라인 레지스터로 전달
@@ -155,7 +154,7 @@ module riscv_core (
 
     .EX_alu_result_i(EX_alu_result_w),
     .EX_instruction_i(EX_instruction_w),
-    .EX_wr_data_i(EX_rd_data2_W),
+    .EX_wr_data_i(EX_rd_data2_w),
     .EX_pc_plus4_i(EX_pc_plus4_w),
 
     .MEM_alu_zeroFlag_o(),
@@ -168,7 +167,7 @@ module riscv_core (
 
     .MEM_alu_result_o(MEM_alu_result_w),
     .MEM_instruction_o(MEM_instruction_w),
-    .MEM_wr_data_o(MEM_rd_data2_W),
+    .MEM_wr_data_o(MEM_rd_data2_w),
     .MEM_pc_plus4_o(MEM_pc_plus4_w)
     );
 
@@ -179,14 +178,14 @@ module riscv_core (
   assign MEM_rd_addr_w = MEM_alu_result_w;
   assign MEM_wr_data_w = MEM_rd_data2_w;
  
-  writeback_stage writeback_stage_inst (
+  memory_stage memory_stage_inst (
     .clk(clk),
     .MEM_MemWrite_i(MEM_MemWrite_w),
     .MEM_MemRead_i(MEM_MemRead_w),
     .MEM_instruction_i(MEM_instruction_w),
     .MEM_rd_addr_i(MEM_rd_addr_w),
     .MEM_wr_data_i(MEM_wr_data_w),
-    .MEM_rd_data_o(MEM_rd_data_o)
+    .MEM_rd_data_o(MEM_rd_data_w)
     );
 
   MEM_to_WB mem_to_wb_inst (
@@ -201,10 +200,10 @@ module riscv_core (
     .MEM_rd_data_i(MEM_rd_data_w),
     .MEM_pc_plus4_i(MEM_pc_plus4_w),
 
-    .WB_WBSel_o(WB_WBsel_w),
+    .WB_WBSel_o(WB_WBSel_w),
     .WB_RegWrite_o(WB_RegWrite_w),
 
-    .WB_alu_result_o(WB_Alu_result_w),
+    .WB_alu_result_o(WB_alu_result_w),
     .WB_instruction_o(WB_instruction_w),
     .WB_rd_data_o(WB_rd_data_w),
     .WB_pc_plus4_o(WB_pc_plus4_w)
@@ -215,5 +214,14 @@ module riscv_core (
   //                   WB Stage                      //
   // =============================================== //
 
+
+  writeback_stage writeback_stage_inst (
+    .WB_WBSel_i(WB_WBSel_w),
+    .WB_alu_result_i(WB_alu_result_w),
+    .WB_rd_data_i(WB_rd_data_w),
+    .WB_pc_plus4_i(WB_pc_plus4_w),
+
+    .WB_writeback_data_o(WB_writeback_data_w)
+  );
 
 endmodule

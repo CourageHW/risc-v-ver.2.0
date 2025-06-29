@@ -29,7 +29,9 @@ add_files -fileset sim_1 [list \
     ./src/3.Execute_Stage/module/alu_control_unit.sv \
     ./src/3.Execute_Stage/execute_stage.sv \
     ./src/4.Memory_Stage/module/data_memory.sv \
-    ./src/4.Memory_Stage/writeback_stage.sv \
+    ./src/4.Memory_Stage/memory_stage.sv \
+    ./src/5.WriteBack_Stage/module/write_back_sel.sv \
+    ./src/5.WriteBack_Stage/writeback_stage.sv \
     ./src/riscv_core.sv \
     ./testbench/2.Decode_Stage/module/tb_register_file.sv \
     ./testbench/2.Decode_Stage/tb_decode_stage.sv \
@@ -44,7 +46,7 @@ add_files -fileset sim_1 [list \
 
 # --- 3. Set Compile Order ---
 # Explicitly set the defines package to be compiled first.
-set_property top tb_data_memory [get_filesets sim_1]
+set_property top tb_riscv_core [get_filesets sim_1]
 update_compile_order -fileset sim_1
 
 

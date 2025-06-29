@@ -1,8 +1,0 @@
-0.7
-2020.2
-Nov  8 2024
-22:36:55
-/home/yonggi/Project_verilog/risc-v-ver.2/src/4.Memory_Stage/module/data_memory.sv,1751219610,systemVerilog,,/home/yonggi/Project_verilog/risc-v-ver.2/testbench/4.Memory_Stage/module/tb_data_memory.sv,,data_memory,,uvm,,,,,,
-/home/yonggi/Project_verilog/risc-v-ver.2/src/header/defines.sv,1751213900,systemVerilog,/home/yonggi/Project_verilog/risc-v-ver.2/src/4.Memory_Stage/module/data_memory.sv;/home/yonggi/Project_verilog/risc-v-ver.2/testbench/4.Memory_Stage/module/tb_data_memory.sv,/home/yonggi/Project_verilog/risc-v-ver.2/src/4.Memory_Stage/module/data_memory.sv,,$unit_defines_sv_962740159;defines,,uvm,,,,,,
-/home/yonggi/Project_verilog/risc-v-ver.2/testbench/4.Memory_Stage/module/tb_data_memory.sv,1751219114,systemVerilog,,,,tb_data_memory,,uvm,,,,,,
-/home/yonggi/Project_verilog/risc-v-ver.2/vivado_debug_project/data_memory_debug.sim/sim_1/behav/xsim/glbl.v,1724786425,verilog,,,,glbl,,uvm,,,,,,

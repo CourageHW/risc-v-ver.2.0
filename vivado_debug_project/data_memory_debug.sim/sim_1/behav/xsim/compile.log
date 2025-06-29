@@ -1,7 +1,0 @@
-INFO: [VRFC 10-2263] Analyzing SystemVerilog file "/home/yonggi/Project_verilog/risc-v-ver.2/src/header/defines.sv" into library xil_defaultlib
-INFO: [VRFC 10-2263] Analyzing SystemVerilog file "/home/yonggi/Project_verilog/risc-v-ver.2/src/4.Memory_Stage/module/data_memory.sv" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module data_memory
-INFO: [VRFC 10-2263] Analyzing SystemVerilog file "/home/yonggi/Project_verilog/risc-v-ver.2/testbench/4.Memory_Stage/module/tb_data_memory.sv" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module tb_data_memory
-INFO: [VRFC 10-2263] Analyzing Verilog file "/home/yonggi/Project_verilog/risc-v-ver.2/vivado_debug_project/data_memory_debug.sim/sim_1/behav/xsim/glbl.v" into library xil_defaultlib
-INFO: [VRFC 10-311] analyzing module glbl

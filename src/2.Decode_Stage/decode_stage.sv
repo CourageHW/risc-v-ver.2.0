@@ -7,7 +7,6 @@ module decode_stage (
   input logic rst_n,
   input logic [DATA_WIDTH-1:0] ID_instruction_i,
 
-  // 테스트를 위해 추가된 Write-Back 입력 포트
   input logic WB_we_i,                  // 레지스터 쓰기 활성화 신호
   input logic [ADDR_WIDTH-1:0] WB_wr_addr_i, // 쓸 레지스터 주소
   input logic [DATA_WIDTH-1:0] WB_wr_data_i, // 쓸 데이터
@@ -61,7 +60,7 @@ module decode_stage (
     .ImmSel_o(ID_ImmSel_w)
     );
 
-  register_file reg_file_inst (
+  register_file register_file_inst (
     .clk(clk),
     .rst_n(rst_n),
     .we_i(WB_we_i), // write back

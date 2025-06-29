@@ -2,7 +2,7 @@
 
 import defines::*;
 
-module writeback_stage (
+module memory_stage (
   input logic clk,
   input logic MEM_MemWrite_i,
   input logic MEM_MemRead_i,
@@ -21,7 +21,7 @@ module writeback_stage (
     .clk(clk),
     .MemWrite_en(MEM_MemWrite_i),
     .MemRead_en(MEM_MemRead_i),
-    .MEM_funct3_i(MEM_funct3_i),
+    .MEM_funct3_i(MEM_funct3_w),
     .rd_addr_i(MEM_rd_addr_i),
     .wr_data_i(MEM_wr_data_i),
     .rd_data_o(MEM_rd_data_o)
