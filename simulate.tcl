@@ -16,9 +16,18 @@ create_project ${PROJ_NAME} ${PROJ_DIR} -part xc7z020clg400-1 -force
 # Add all necessary source files using relative paths from the project root.
 add_files -fileset sim_1 [list \
     ./src/header/defines.sv \
+    ./src/0.Pipeline_Register/IF_to_ID.sv \
     ./src/0.Pipeline_Register/ID_to_EX.sv \
     ./src/0.Pipeline_Register/EX_to_MEM.sv \
     ./src/0.Pipeline_Register/MEM_to_WB.sv \
+    ./src/1.Fetch_Stage/module/pc_add.sv \
+    ./src/1.Fetch_Stage/module/pc_sel.sv \
+    ./src/1.Fetch_Stage/module/program_counter.sv \
+    ./src/1.Fetch_Stage/module/instruction_memory.sv \
+    ./src/1.Fetch_Stage/fetch_stage.sv \
+    ./src/2.Decode_Stage/module/branch_comparator.sv \
+    ./src/2.Decode_Stage/module/branch_determination.sv \
+    ./src/2.Decode_Stage/module/target_address_adder.sv \
     ./src/2.Decode_Stage/module/immediate_generator.sv \
     ./src/2.Decode_Stage/module/main_control_unit.sv \
     ./src/2.Decode_Stage/module/immediate_sel.sv \
@@ -42,7 +51,7 @@ add_files -fileset sim_1 [list \
     ./testbench/tb_riscv_core.sv \
 ]
 
-#add_files -fileset sim_1 -norecurse ./src/program.mem
+add_files -fileset sim_1 -norecurse ./program.mem \
 
 # --- 3. Set Compile Order ---
 # Explicitly set the defines package to be compiled first.

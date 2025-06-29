@@ -17,8 +17,7 @@ module execute_stage (
   input fw_sel_e EX_forwardA_i,
   input fw_sel_e EX_forwardB_i,
 
-  output logic [DATA_WIDTH-1:0] EX_alu_result_o,
-  output logic EX_alu_zeroFlag_o
+  output logic [DATA_WIDTH-1:0] EX_alu_result_o
   );
 
   alu_sel_e EX_ALUSel_w;
@@ -63,7 +62,6 @@ module execute_stage (
     .alu_operand1_i(EX_alu_operand1_w),
     .alu_operand2_i(EX_alu_operand2_w),
     .ALUSel_i(EX_ALUSel_w),
-    .alu_result_o(EX_alu_result_o),
-    .alu_zeroFlag_o(EX_alu_zeroFlag_o)
+    .alu_result_o(EX_alu_result_o)
   );
 endmodule

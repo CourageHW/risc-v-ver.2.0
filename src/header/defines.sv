@@ -9,6 +9,9 @@ package defines;
   localparam DATA_MEM_DEPTH = 1024;
   localparam DATA_MEM_ADDR_WIDTH = $clog2(DATA_MEM_DEPTH);
 
+  localparam INST_MEM_DEPTH = 1024;
+  localparam INST_MEM_ADDR_WIDTH = $clog2(INST_MEM_DEPTH);
+
   // Main Opcodes
   localparam OPCODE_LOAD    = 7'b0000011;  // I-type: lb, lh, lw, ld, lbu, lhu, lwu
   localparam OPCODE_ITYPE   = 7'b0010011;  // I-type: addi, slti, sltiu, xori, ori, andi, slli, srli, srai
@@ -55,6 +58,7 @@ package defines;
   localparam FUNCT3_BLT     = 3'b100;
   localparam FUNCT3_BGE     = 3'b101;
   localparam FUNCT3_BLTU    = 3'b110;
+  localparam FUNCT3_BGEU    = 3'b111;
 
   typedef enum logic [1:0] {
     FW_NONE,    // no forwarding

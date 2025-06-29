@@ -11,8 +11,6 @@ module EX_to_MEM (
   input wb_sel_e EX_WBSel_i,
   input logic EX_MemRead_i,
   input logic EX_MemWrite_i,
-  input logic EX_Jump_i,
-  input logic EX_Branch_i,
   input logic EX_RegWrite_i,
   
   input logic [DATA_WIDTH-1:0] EX_alu_result_i,
@@ -24,8 +22,6 @@ module EX_to_MEM (
   output wb_sel_e MEM_WBSel_o,
   output logic MEM_MemRead_o,
   output logic MEM_MemWrite_o,
-  output logic MEM_Jump_o,
-  output logic MEM_Branch_o,
   output logic MEM_RegWrite_o,
   
   output logic [DATA_WIDTH-1:0] MEM_alu_result_o,
@@ -40,8 +36,6 @@ module EX_to_MEM (
       MEM_WBSel_o        <= WB_NONE;
       MEM_MemRead_o      <= 0;
       MEM_MemWrite_o     <= 0;
-      MEM_Jump_o         <= 0;
-      MEM_Branch_o       <= 0;
       MEM_RegWrite_o     <= 0;
       
       MEM_alu_result_o  <= '0;
@@ -53,8 +47,6 @@ module EX_to_MEM (
       MEM_WBSel_o        <= EX_WBSel_i       ;
       MEM_MemRead_o      <= EX_MemRead_i     ;
       MEM_MemWrite_o     <= EX_MemWrite_i    ;
-      MEM_Jump_o         <= EX_Jump_i        ;
-      MEM_Branch_o       <= EX_Branch_i      ;
       MEM_RegWrite_o     <= EX_RegWrite_i    ;
                            
       MEM_alu_result_o  <= EX_alu_result_i  ;

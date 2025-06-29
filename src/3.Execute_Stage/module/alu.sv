@@ -7,8 +7,7 @@ module alu (
   input logic [DATA_WIDTH-1:0] alu_operand1_i,
   input logic [DATA_WIDTH-1:0] alu_operand2_i,
 
-  output logic [DATA_WIDTH-1:0] alu_result_o,
-  output logic alu_zeroFlag_o
+  output logic [DATA_WIDTH-1:0] alu_result_o
 );
 
   always_comb begin
@@ -29,7 +28,4 @@ module alu (
       default : alu_result_o = 'x;
     endcase
   end
-
-  assign alu_zeroFlag_o = (alu_result_o == '0);
-
 endmodule
