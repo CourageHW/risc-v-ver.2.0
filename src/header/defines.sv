@@ -6,6 +6,9 @@ package defines;
   localparam REG_COUNT  = 32;
   localparam ADDR_WIDTH = $clog2(REG_COUNT);
 
+  localparam DATA_MEM_DEPTH = 1024;
+  localparam DATA_MEM_ADDR_WIDTH = $clog2(DATA_MEM_DEPTH);
+
   // Main Opcodes
   localparam OPCODE_LOAD    = 7'b0000011;  // I-type: lb, lh, lw, ld, lbu, lhu, lwu
   localparam OPCODE_ITYPE   = 7'b0010011;  // I-type: addi, slti, sltiu, xori, ori, andi, slli, srli, srai

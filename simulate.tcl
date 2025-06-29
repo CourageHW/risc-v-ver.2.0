@@ -17,6 +17,8 @@ create_project ${PROJ_NAME} ${PROJ_DIR} -part xc7z020clg400-1 -force
 add_files -fileset sim_1 [list \
     ./src/header/defines.sv \
     ./src/0.Pipeline_Register/ID_to_EX.sv \
+    ./src/0.Pipeline_Register/EX_to_MEM.sv \
+    ./src/0.Pipeline_Register/MEM_to_WB.sv \
     ./src/2.Decode_Stage/module/immediate_generator.sv \
     ./src/2.Decode_Stage/module/main_control_unit.sv \
     ./src/2.Decode_Stage/module/immediate_sel.sv \
@@ -26,12 +28,15 @@ add_files -fileset sim_1 [list \
     ./src/3.Execute_Stage/module/alu.sv \
     ./src/3.Execute_Stage/module/alu_control_unit.sv \
     ./src/3.Execute_Stage/execute_stage.sv \
+    ./src/4.Memory_Stage/module/data_memory.sv \
+    ./src/4.Memory_Stage/writeback_stage.sv \
     ./src/riscv_core.sv \
     ./testbench/2.Decode_Stage/module/tb_register_file.sv \
     ./testbench/2.Decode_Stage/tb_decode_stage.sv \
     ./testbench/3.Execute_Stage/module/tb_alu.sv \
     ./testbench/3.Execute_Stage/module/tb_alu_control_unit.sv \
     ./testbench/3.Execute_Stage/tb_execute_stage.sv \
+    ./testbench/4.Memory_Stage/module/tb_data_memory.sv \
     ./testbench/tb_riscv_core.sv \
 ]
 
@@ -39,24 +44,23 @@ add_files -fileset sim_1 [list \
 
 # --- 3. Set Compile Order ---
 # Explicitly set the defines package to be compiled first.
-set_property top tb_riscv_core [get_filesets sim_1]
+set_property top tb_data_memory [get_filesets sim_1]
 update_compile_order -fileset sim_1
 
 
-# --- 4. Launch Simulation ---
-launch_simulation
-
-# --- 5. Run Simulation ---
-run -all
-
+# --- 4. Launch Simulation & Control ---
+# Check if the 'gui' argument was passed from the shell script
 if { $argc > 0 && [lindex $argv 0] == "gui" } {
-    # '-gui' 옵션이 있으면, 파형 분석을 위해 GUI를 실행합니다.
-    puts "INFO: Simulation stopped. Opening waveform GUI..."
-    start_gui
-    # GUI 모드에서는 사용자가 직접 닫을 것이므로, 자동으로 종료하지 않습니다.
+    # GUI Mode: Launch the simulation and open the GUI.
+    puts "INFO: GUI mode requested. Launching simulation with GUI."
+    launch_simulation -gui
+    run -all
+    # The GUI will remain open for analysis.
 } else {
-    # '-gui' 옵션이 없으면 (기본 동작), 프로젝트를 닫고 종료합니다.
-    puts "INFO: Simulation finished. Closing project."
+    # Batch Mode: Launch, run, and exit.
+    puts "INFO: Batch mode requested. Launching simulation without GUI."
+    launch_simulation
+    run -all
     close_project
     exit
 }

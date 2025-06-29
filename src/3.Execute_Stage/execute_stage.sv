@@ -9,9 +9,7 @@ module execute_stage (
   input logic [DATA_WIDTH-1:0] WB_alu_result_i,
   input logic [DATA_WIDTH-1:0] EX_imm_i,
   input logic [DATA_WIDTH-1:0] EX_pc_i,
-
-  input logic [2:0] EX_alu_ctrl_funct3_i,
-  input logic EX_alu_ctrl_funct7_i,
+  input logic [DATA_WIDTH-1:0] EX_instruction_i,
 
   input logic EX_ALUOpSrc1_i,
   input logic EX_ALUOpSrc2_i,
@@ -27,6 +25,9 @@ module execute_stage (
 
   logic [DATA_WIDTH-1:0] forwardA_result, forwardB_result;
   logic [DATA_WIDTH-1:0] EX_alu_operand1_w, EX_alu_operand2_w;
+  
+  logic [2:0] EX_alu_ctrl_funct3_w;
+  logic       EX_alu_ctrl_funct7_w;
 
   MUX_3to1 forwardA_inst (
     .rd_data_i(EX_rd_data1_i),
@@ -48,6 +49,8 @@ module execute_stage (
   assign EX_alu_operand1_w = (EX_ALUOpSrc1_i) ? EX_pc_i : forwardA_result;
   assign EX_alu_operand2_w = (EX_ALUOpSrc2_i) ? EX_imm_i : forwardB_result;
 
+  assign EX_alu_ctrl_funct3_w = EX_instruction_i[14:12];
+  assign EX_alu_ctrl_funct7_w = EX_instruction_i[30];
 
   alu_control_unit alu_ctrl_inst (
     .alu_ctrl_funct3_i(EX_alu_ctrl_funct3_i),

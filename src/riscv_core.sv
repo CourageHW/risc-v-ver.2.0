@@ -11,29 +11,38 @@ module riscv_core (
   input logic [ADDR_WIDTH-1:0] WB_wr_addr,
   input logic [DATA_WIDTH-1:0] WB_wr_data,
 
-  output logic [DATA_WIDTH-1:0] alu_result_o, // 테스트용
   output logic alu_zeroFlag_o // 테스트용
   );
 
 
-  wb_sel_e ID_WBSel_w, EX_WBSel_w, MEM_WBSEl_w;
+  wb_sel_e ID_WBSel_w, EX_WBSel_w, MEM_WBSel_w, WB_WBSel_w;
   alu_op_e ID_ALUOp_w, EX_ALUOp_w;
   logic ID_MemRead_w, EX_MemRead_w, MEM_MemRead_w; 
   logic ID_MemWrite_w, EX_MemWrite_w, MEM_MemWrite_w; 
   logic ID_Jump_w, EX_Jump_w, MEM_Jump_w;
   logic ID_Branch_w, EX_Branch_w, MEM_Branch_w;
-  logic ID_RegWrite_w, EX_RegWrite_w, MEM_RegWrite_w;
+  logic ID_RegWrite_w, EX_RegWrite_w, MEM_RegWrite_w, WB_RegWrite_w;
   logic ID_ALUOpSrc1_w, EX_ALUOpSrc1_w;
   logic ID_ALUOpSrc2_w, EX_ALUOpSrc2_w;
 
-  logic [DATA_WIDTH-1:0] ID_instruction_w, EX_instruction_w, MEM_instruction_w;
+  logic [DATA_WIDTH-1:0] ID_instruction_w, EX_instruction_w, MEM_instruction_w, WB_instruction_w;
   logic [DATA_WIDTH-1:0] ID_rd_data1_w, EX_rd_data1_w;
   logic [DATA_WIDTH-1:0] ID_rd_data2_w, EX_rd_data2_w;
   logic [DATA_WIDTH-1:0] ID_imm_w, EX_imm_w;
   logic [DATA_WIDTH-1:0] ID_pc_w, EX_pc_w;
-  logic [DATA_WIDTH-1:0] ID_pc_plus4_w, EX_pc_plus4_w, MEM_pc_plus4_w;
+  logic [DATA_WIDTH-1:0] ID_pc_plus4_w, EX_pc_plus4_w, MEM_pc_plus4_w, WB_pc_plus4_w;
+  logic [DATA_WIDTH-1:0] EX_alu_result_w, MEM_alu_result_w, WB_alu_result_w;
+  logic [DATA_WIDTH-1:0] MEM_rd_addr_w;
+  logic [DATA_WIDTH-1:0] MEM_wr_data_w;
+  logic [DATA_WIDTH-1:0] MEM_rd_data_w, WB_rd_data_w;
+
+
+  // =============================================== //
+  //                   ID Stage                      //
+  // =============================================== //
 
   assign ID_pc_w = pc_i; // 테스트용
+  assign ID_pc_plus4_w = ID_pc_w + 32'd4; // 테스트용
 
   decode_stage decode_stage_inst (
     // --- 입력 포트 ---
@@ -106,11 +115,11 @@ module riscv_core (
     .EX_pc_plus4_o(EX_pc_plus4_w)
   );
 
-  logic [2:0] EX_alu_ctrl_funct3_w;
-  logic       EX_alu_ctrl_funct7_w;
 
-  assign EX_alu_ctrl_funct3_w = EX_instruction_w[14:12];
-  assign EX_alu_ctrl_funct7_w = EX_instruction_w[30];
+  // =============================================== //
+  //                   EX Stage                      //
+  // =============================================== //
+
 
   execute_stage execute_stage_inst (
     .EX_rd_data1_i(EX_rd_data1_w),
@@ -119,15 +128,14 @@ module riscv_core (
     .WB_alu_result_i(32'd0),  // 임시
     .EX_imm_i(EX_imm_w),
     .EX_pc_i(EX_pc_w),
-    .EX_alu_ctrl_funct3_i(EX_alu_ctrl_funct3_w),
-    .EX_alu_ctrl_funct7_i(EX_alu_ctrl_funct7_w),
+    .EX_instruction_i(EX_instruction_w),
     .EX_ALUOpSrc1_i(EX_ALUOpSrc1_w),
     .EX_ALUOpSrc2_i(EX_ALUOpSrc2_w),
     .EX_ALUOp_i(EX_ALUOp_w),
     .EX_forwardA_i(FW_NONE), // 임시
     .EX_forwardB_i(FW_NONE), // 임시
 
-    .EX_alu_result_o(alu_result_o),
+    .EX_alu_result_o(EX_alu_result_w),
     .EX_alu_zeroFlag_o(alu_zeroFlag_o)
     );
 
@@ -145,22 +153,67 @@ module riscv_core (
     .EX_Branch_i(EX_Branch_w),
     .EX_RegWrite_i(EX_RegWrite_w),
 
-    .EX_alu_result_i(),
+    .EX_alu_result_i(EX_alu_result_w),
     .EX_instruction_i(EX_instruction_w),
     .EX_wr_data_i(EX_rd_data2_W),
-    .EX_pc_plus4_i(),
+    .EX_pc_plus4_i(EX_pc_plus4_w),
 
     .MEM_alu_zeroFlag_o(),
-    .MEM_WBSel_i(MEM_WBSel_w),
-    .MEM_MemRead_i(MEM_MemRead_w),
+    .MEM_WBSel_o(MEM_WBSel_w),
+    .MEM_MemRead_o(MEM_MemRead_w),
+    .MEM_MemWrite_o(MEM_MemWrite_w),
+    .MEM_Jump_o(MEM_Jump_w),
+    .MEM_Branch_o(MEM_Branch_w),
+    .MEM_RegWrite_o(MEM_RegWrite_w),
+
+    .MEM_alu_result_o(MEM_alu_result_w),
+    .MEM_instruction_o(MEM_instruction_w),
+    .MEM_wr_data_o(MEM_rd_data2_W),
+    .MEM_pc_plus4_o(MEM_pc_plus4_w)
+    );
+
+  // =============================================== //
+  //                   MEM Stage                     //
+  // =============================================== //
+
+  assign MEM_rd_addr_w = MEM_alu_result_w;
+  assign MEM_wr_data_w = MEM_rd_data2_w;
+ 
+  writeback_stage writeback_stage_inst (
+    .clk(clk),
     .MEM_MemWrite_i(MEM_MemWrite_w),
-    .MEM_Jump_i(MEM_Jump_w),
-    .MEM_Branch_i(MEM_Branch_w),
+    .MEM_MemRead_i(MEM_MemRead_w),
+    .MEM_instruction_i(MEM_instruction_w),
+    .MEM_rd_addr_i(MEM_rd_addr_w),
+    .MEM_wr_data_i(MEM_wr_data_w),
+    .MEM_rd_data_o(MEM_rd_data_o)
+    );
+
+  MEM_to_WB mem_to_wb_inst (
+    .clk(clk),
+    .rst_n(rst_n),
+
+    .MEM_WBSel_i(MEM_WBSel_w),
     .MEM_RegWrite_i(MEM_RegWrite_w),
 
-    .MEM_alu_result_i(),
+    .MEM_alu_result_i(MEM_alu_result_w),
     .MEM_instruction_i(MEM_instruction_w),
-    .MEM_wr_data_i(MEM_rd_data2_W),
-    .MEM_pc_plus4_i(),
+    .MEM_rd_data_i(MEM_rd_data_w),
+    .MEM_pc_plus4_i(MEM_pc_plus4_w),
+
+    .WB_WBSel_o(WB_WBsel_w),
+    .WB_RegWrite_o(WB_RegWrite_w),
+
+    .WB_alu_result_o(WB_Alu_result_w),
+    .WB_instruction_o(WB_instruction_w),
+    .WB_rd_data_o(WB_rd_data_w),
+    .WB_pc_plus4_o(WB_pc_plus4_w)
     );
+
+
+  // =============================================== //
+  //                   WB Stage                      //
+  // =============================================== //
+
+
 endmodule
