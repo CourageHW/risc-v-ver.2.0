@@ -1,27 +1,32 @@
 `timescale 1ns / 1ps
 
-// Import the definitions package
 import defines::*;
 
 module tb_data_memory;
 
   // Testbench signals
   logic clk;
-  logic MemWrite_en;
-  logic MemRead_en;
+  logic MEM_MemWrite_en;
+  logic MEM_MemRead_en;
+  logic WB_MemWrite_en;
   logic [2:0] MEM_funct3_i;
-  logic [DATA_WIDTH-1:0] rd_addr_i;
-  logic [DATA_WIDTH-1:0] wr_data_i;
+  logic [DATA_WIDTH-1:0] MEM_addr_i;
+  logic [DATA_WIDTH-1:0] WB_addr_i;
+  logic [DATA_WIDTH-1:0] MEM_wr_data_i;
+  logic [DATA_WIDTH-1:0] WB_wr_data_i;
   logic [DATA_WIDTH-1:0] rd_data_o;
 
   // Instantiate the Device Under Test (DUT)
   data_memory dut (
     .clk(clk),
-    .MemWrite_en(MemWrite_en),
-    .MemRead_en(MemRead_en),
+    .MEM_MemWrite_en(MEM_MemWrite_en),
+    .MEM_MemRead_en(MEM_MemRead_en),
+    .WB_MemWrite_en(WB_MemWrite_en),
     .MEM_funct3_i(MEM_funct3_i),
-    .rd_addr_i(rd_addr_i),
-    .wr_data_i(wr_data_i),
+    .MEM_addr_i(MEM_addr_i),
+    .WB_addr_i(WB_addr_i),
+    .MEM_wr_data_i(MEM_wr_data_i),
+    .WB_wr_data_i(WB_wr_data_i),
     .rd_data_o(rd_data_o)
   );
 
@@ -35,11 +40,14 @@ module tb_data_memory;
   initial begin
     $display("Starting Data Memory Testbench...");
     // 1. Initialize inputs
-    MemWrite_en = 0;
-    MemRead_en = 0;
+    MEM_MemWrite_en = 0;
+    MEM_MemRead_en = 0;
+    WB_MemWrite_en = 0;
     MEM_funct3_i = 0;
-    rd_addr_i = 0;
-    wr_data_i = 0;
+    MEM_addr_i = 0;
+    WB_addr_i = 0;
+    MEM_wr_data_i = 0;
+    WB_wr_data_i = 0;
 
     // Wait for a few cycles to stabilize
     repeat(2) @(posedge clk);
@@ -47,21 +55,20 @@ module tb_data_memory;
     // TEST 1: Store Word (SW) and Load Word (LW)
     $display("Test 1: SW -> LW");
     @(posedge clk);
-    MemWrite_en  <= 1;
-    MemRead_en   <= 0;
-    MEM_funct3_i <= FUNCT3_SW;
-    rd_addr_i    <= 32'h0000_0100; // Address 256
-    wr_data_i    <= 32'hDEADBEEF;
+    MEM_MemWrite_en <= 1;
+    MEM_MemRead_en  <= 0;
+    MEM_funct3_i    <= FUNCT3_SW;
+    MEM_addr_i      <= 32'h0000_0100; // Address 256
+    MEM_wr_data_i   <= 32'hDEADBEEF;
     @(posedge clk);
-    MemWrite_en  <= 0; // De-assert write enable
+    MEM_MemWrite_en <= 0; // De-assert write enable
 
     // Read back the data
-    MemRead_en   <= 1;
-    rd_addr_i    <= 32'h0000_0100;
+    MEM_MemRead_en  <= 1;
+    MEM_addr_i      <= 32'h0000_0100;
     @(posedge clk);
-    MemRead_en   <= 0; // De-assert read enable after one cycle
+    MEM_MemRead_en  <= 0; // De-assert read enable after one cycle
     
-    // The read data will be available on the next clock edge
     @(posedge clk); 
     if (rd_data_o === 32'hDEADBEEF) begin
       $display("  [PASS] SW/LW test passed. Read: %h", rd_data_o);
@@ -75,29 +82,29 @@ module tb_data_memory;
     $display("Test 2: SH -> LW");
     // First, write a known value to the word
     @(posedge clk);
-    MemWrite_en  <= 1;
-    MEM_funct3_i <= FUNCT3_SW;
-    rd_addr_i    <= 32'h0000_0200; // Address 512
-    wr_data_i    <= 32'hAAAAAAAA;
+    MEM_MemWrite_en <= 1;
+    MEM_funct3_i    <= FUNCT3_SW;
+    MEM_addr_i      <= 32'h0000_0200; // Address 512
+    MEM_wr_data_i   <= 32'hAAAAAAAA;
     @(posedge clk);
     
     // Write to the lower half-word (address 512)
-    MEM_funct3_i <= FUNCT3_SH;
-    rd_addr_i    <= 32'h0000_0200;
-    wr_data_i    <= 32'hXXXXCAFE; // Lower 16 bits are 'CAFE'
+    MEM_funct3_i    <= FUNCT3_SH;
+    MEM_addr_i      <= 32'h0000_0200;
+    MEM_wr_data_i   <= 32'hXXXXCAFE; // Lower 16 bits are 'CAFE'
     @(posedge clk);
 
     // Write to the upper half-word (address 514)
-    rd_addr_i    <= 32'h0000_0202;
-    wr_data_i    <= 32'hXXXXBEEF; // Lower 16 bits are 'BEEF'
+    MEM_addr_i      <= 32'h0000_0202;
+    MEM_wr_data_i   <= 32'hXXXXBEEF; // Lower 16 bits are 'BEEF'
     @(posedge clk);
-    MemWrite_en  <= 0;
+    MEM_MemWrite_en <= 0;
 
     // Read back the full word and check
-    MemRead_en   <= 1;
-    rd_addr_i    <= 32'h0000_0200;
+    MEM_MemRead_en  <= 1;
+    MEM_addr_i      <= 32'h0000_0200;
     @(posedge clk);
-    MemRead_en   <= 0;
+    MEM_MemRead_en  <= 0;
     @(posedge clk);
     if (rd_data_o === 32'hBEEFCAFE) begin
       $display("  [PASS] SH/LW test passed. Read: %h", rd_data_o);
@@ -109,45 +116,73 @@ module tb_data_memory;
 
     // TEST 3: Store Byte (SB) and Load Word (LW)
     $display("Test 3: SB -> LW");
-    // Pre-fill the word
     @(posedge clk);
-    MemWrite_en  <= 1;
-    MEM_funct3_i <= FUNCT3_SW;
-    rd_addr_i    <= 32'h0000_0300; // Address 768
-    wr_data_i    <= 32'hFFFFFFFF;
+    MEM_MemWrite_en <= 1;
+    MEM_funct3_i    <= FUNCT3_SW;
+    MEM_addr_i      <= 32'h0000_0300; // Address 768
+    MEM_wr_data_i   <= 32'hFFFFFFFF;
     @(posedge clk);
 
     // Write individual bytes
-    MEM_funct3_i <= FUNCT3_SB;
-    rd_addr_i    <= 32'h0000_0300; // Byte 0
-    wr_data_i    <= 32'hXXXXXX11;
+    MEM_funct3_i    <= FUNCT3_SB;
+    MEM_addr_i      <= 32'h0000_0300; // Byte 0
+    MEM_wr_data_i   <= 32'hXXXXXX11;
     @(posedge clk);
-    rd_addr_i    <= 32'h0000_0301; // Byte 1
-    wr_data_i    <= 32'hXXXXXX22;
+    MEM_addr_i      <= 32'h0000_0301; // Byte 1
+    MEM_wr_data_i   <= 32'hXXXXXX22;
     @(posedge clk);
-    rd_addr_i    <= 32'h0000_0302; // Byte 2
-    wr_data_i    <= 32'hXXXXXX33;
+    MEM_addr_i      <= 32'h0000_0302; // Byte 2
+    MEM_wr_data_i   <= 32'hXXXXXX33;
     @(posedge clk);
-    rd_addr_i    <= 32'h0000_0303; // Byte 3
-    wr_data_i    <= 32'hXXXXXX44;
+    MEM_addr_i      <= 32'h0000_0303; // Byte 3
+    MEM_wr_data_i   <= 32'hXXXXXX44;
     @(posedge clk);
-    MemWrite_en  <= 0;
+    MEM_MemWrite_en <= 0;
 
     // Read back the full word
-    MemRead_en   <= 1;
-    rd_addr_i    <= 32'h0000_0300;
+    MEM_MemRead_en  <= 1;
+    MEM_addr_i      <= 32'h0000_0300;
     @(posedge clk);
-    MemRead_en   <= 0;
+    MEM_MemRead_en  <= 0;
     @(posedge clk);
     if (rd_data_o === 32'h44332211) begin
       $display("  [PASS] SB/LW test passed. Read: %h", rd_data_o);
     end else begin
       $error("  [FAIL] SB/LW test failed. Expected: %h, Got: %h", 32'h44332211, rd_data_o);
     end
-  
-    $display("All tests finished.");
+    
+    repeat(2) @(posedge clk);
 
-    repeat(100) @(posedge clk);
+    // TEST 4: Write-Back Forwarding
+    $display("Test 4: Write-Back Forwarding");
+    // Write an initial value to memory
+    @(posedge clk);
+    MEM_MemWrite_en <= 1;
+    MEM_funct3_i    <= FUNCT3_SW;
+    MEM_addr_i      <= 32'h0000_0400; // Address 1024
+    MEM_wr_data_i   <= 32'h11111111;
+    @(posedge clk);
+    MEM_MemWrite_en <= 0;
+    @(posedge clk);
+
+    // Now, read from the address while a WB is pending for the same address
+    MEM_MemRead_en  <= 1;
+    MEM_addr_i      <= 32'h0000_0400;
+    WB_MemWrite_en  <= 1;
+    WB_addr_i       <= 32'h0000_0400;
+    WB_wr_data_i    <= 32'hFFFFFFFF; // This value should be forwarded
+    @(posedge clk);
+    MEM_MemRead_en  <= 0;
+    WB_MemWrite_en  <= 0;
+    @(posedge clk);
+    if (rd_data_o === 32'hFFFFFFFF) begin
+      $display("  [PASS] Forwarding test passed. Read: %h", rd_data_o);
+    end else begin
+      $error("  [FAIL] Forwarding test failed. Expected: %h, Got: %h", 32'hFFFFFFFF, rd_data_o);
+    end
+
+    $display("All tests finished.");
+    #100;
     $stop;
   end
 

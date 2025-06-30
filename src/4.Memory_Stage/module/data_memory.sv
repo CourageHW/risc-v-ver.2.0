@@ -4,11 +4,14 @@ import defines::*;
 
 module data_memory (
   input logic clk,
-  input logic MemWrite_en,
-  input logic MemRead_en,
+  input logic MEM_MemWrite_en,
+  input logic MEM_MemRead_en,
+  input logic WB_MemWrite_en,
   input logic [2:0] MEM_funct3_i,
-  input logic [DATA_WIDTH-1:0] rd_addr_i,
-  input logic [DATA_WIDTH-1:0] wr_data_i,
+  input logic [DATA_WIDTH-1:0] MEM_addr_i,
+  input logic [DATA_WIDTH-1:0] WB_addr_i,
+  input logic [DATA_WIDTH-1:0] MEM_wr_data_i,
+  input logic [DATA_WIDTH-1:0] WB_wr_data_i,
 
   output logic [DATA_WIDTH-1:0] rd_data_o
 );
@@ -16,38 +19,43 @@ module data_memory (
   // Use "reg" for memory inside a procedural block, which is more conventional.
   (* ram_style = "block" *) logic [DATA_WIDTH-1:0] memory [0:DATA_MEM_DEPTH-1];
 
-  logic [DATA_MEM_ADDR_WIDTH-1:0] word_addr_w;
+  logic [DATA_MEM_ADDR_WIDTH-1:0] MEM_word_addr_w, WB_word_addr_w;
 
-  assign word_addr_w = rd_addr_i[DATA_MEM_ADDR_WIDTH+1:2];
+  assign MEM_word_addr_w = MEM_addr_i[DATA_MEM_ADDR_WIDTH+1:2];
+  assign WB_word_addr_w = WB_addr_i[DATA_MEM_ADDR_WIDTH+1:2];
 
   always_ff @(posedge clk) begin
     // --- Read Logic ---
-    if (MemRead_en) begin
-      rd_data_o <= memory[word_addr_w];
+    if (MEM_MemRead_en) begin
+      if (WB_MemWrite_en && (WB_word_addr_w == MEM_word_addr_w)) begin
+        rd_data_o <= WB_wr_data_i;
+      end else begin
+        rd_data_o <= memory[MEM_word_addr_w];
+      end
     end
 
     // --- Write Logic ---
-    if (MemWrite_en) begin
+    if (MEM_MemWrite_en) begin
       unique case (MEM_funct3_i)
         FUNCT3_SW: begin
-          memory[word_addr_w] <= wr_data_i;
+          memory[MEM_word_addr_w] <= MEM_wr_data_i;
         end
 
         FUNCT3_SH: begin
-          if (rd_addr_i[1] == 1'b0) begin 
-            memory[word_addr_w][15:0] <= wr_data_i[15:0];
-          end else begin 
-            memory[word_addr_w][31:16] <= wr_data_i[15:0]; 
+          if (MEM_addr_i[1] == 1'b0) begin 
+            memory[MEM_word_addr_w][15:0] <= MEM_wr_data_i[15:0];
+          end else begin
+            memory[MEM_word_addr_w][31:16] <= MEM_wr_data_i[15:0];
           end
         end
 
         // Store Byte (SB)
         FUNCT3_SB: begin
-          unique case (rd_addr_i[1:0])
-            2'b00: memory[word_addr_w][7:0]   <= wr_data_i[7:0];
-            2'b01: memory[word_addr_w][15:8]  <= wr_data_i[7:0];
-            2'b10: memory[word_addr_w][23:16] <= wr_data_i[7:0];
-            2'b11: memory[word_addr_w][31:24] <= wr_data_i[7:0];
+          unique case (MEM_addr_i[1:0])
+            2'b00: memory[MEM_word_addr_w][7:0]   <= MEM_wr_data_i[7:0];
+            2'b01: memory[MEM_word_addr_w][15:8]  <= MEM_wr_data_i[7:0];
+            2'b10: memory[MEM_word_addr_w][23:16] <= MEM_wr_data_i[7:0];
+            2'b11: memory[MEM_word_addr_w][31:24] <= MEM_wr_data_i[7:0];
           endcase
         end
         

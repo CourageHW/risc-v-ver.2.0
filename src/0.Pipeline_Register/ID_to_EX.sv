@@ -5,6 +5,7 @@ import defines::*;
 module ID_to_EX (
   input logic clk,
   input logic rst_n,
+  input logic flush_i,
 
   input wb_sel_e ID_WBSel_i,
   input fw_sel_e ID_forwardA_i,
@@ -42,7 +43,7 @@ module ID_to_EX (
   );
 
   always_ff @(posedge clk) begin
-    if (!rst_n) begin
+    if (!rst_n || flush_i) begin
       EX_WBSel_o     <= WB_NONE;
       EX_forwardA_o  <= FW_NONE;
       EX_forwardB_o  <= FW_NONE;
@@ -57,6 +58,8 @@ module ID_to_EX (
       EX_rd_data1_o    <= '0;
       EX_rd_data2_o    <= '0;
       EX_imm_o         <= '0;
+      EX_pc_o          <= '0;
+      EX_pc_plus4_o    <= '0;
     end else begin
       EX_WBSel_o     <= ID_WBSel_i;
       EX_forwardA_o  <= ID_forwardA_i;
@@ -72,6 +75,8 @@ module ID_to_EX (
       EX_rd_data1_o    <= ID_rd_data1_i;
       EX_rd_data2_o    <= ID_rd_data2_i;
       EX_imm_o         <= ID_imm_i;
+      EX_pc_o          <= ID_pc_i;
+      EX_pc_plus4_o    <= ID_pc_plus4_i;
     end
   end
 

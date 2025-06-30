@@ -5,6 +5,7 @@ import defines::*;
 module fetch_stage (
   input logic clk,
   input logic rst_n,
+  input logic IF_pc_write_en_i,
   input logic [DATA_WIDTH-1:0] IF_branch_target_addr_i,
 
   input logic IF_PCSrc_i,
@@ -33,14 +34,14 @@ module fetch_stage (
   program_counter program_counter_inst (
     .clk(clk),
     .rst_n(rst_n),
-    .pc_en_i(1'b1),
+    .pc_en_i(IF_pc_write_en_i),
     .pc_i(IF_pc_sel_w),
     .pc_o(IF_pc_w)
     );
 
   pc_add pc_add_inst (
     .pc_i(IF_pc_w),
-    .pc_o(IF_pc_plus4_w)
+    .pc_plus4_o(IF_pc_plus4_w)
   );
 
   instruction_memory instruction_memory_inst (
