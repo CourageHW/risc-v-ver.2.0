@@ -24,48 +24,66 @@ module tb_riscv_core;
   // --- Test Sequence ---
   initial begin
     $display("===============================================");
-    $display("=  Starting Load-Use Hazard Test Simulation   =");
+    $display("=  Starting RISC-V Core Simulation          =");
     $display("===============================================");
 
-    // 1. 리셋 인가
+    // 1. Apply Reset
     rst_n = 1'b0;
-    repeat (2) @(posedge clk);
+    repeat (5) @(posedge clk); // Hold reset for a few cycles
     rst_n = 1'b1;
     $display("[%0t] Reset released.", $time);
 
-    // 2. 프로그램이 끝나고 무한루프에 도달할 때까지 충분한 시간 동안 시뮬레이션 실행
-    repeat (20) @(posedge clk);
+    // 2. Run the program loaded from program.mem
+    // The program.mem contains:
+    // 00a00093  -> addi x1, x0, 10 (x1 = 10)
+    // 01400113  -> addi x2, x0, 20 (x2 = 20)
+    // 002081b3  -> add x3, x1, x2 (x3 = x1 + x2 = 10 + 20 = 30)
+    // 00302023  -> sw x3, 0(x0) (store x3 to data memory address 0)
+    // 00002203  -> lw x4, 0(x0) (load from data memory address 0 to x4)
 
-    // 3. 최종 레지스터 값 검증
+    repeat (15) @(posedge clk); // Run for enough cycles for instructions to complete
+
+    // 3. Verify final register values and memory content
     $display("\n-----------------------------------------------");
-    $display("--- Final Register State Verification ---");
+    $display("--- Final State Verification ---");
     $display("-----------------------------------------------");
     
-    // 스톨 로직이 성공했다면 아래 값들이 정확히 일치해야 합니다.
-    // DUT 내부 레지스터 파일 경로는 실제 설계에 맞게 수정해야 할 수 있습니다.
-    // 예: dut.decode_stage_inst.register_file_inst.rf[1]
-    verify_register("x1 (100)", dut.decode_stage_inst.register_file_inst.registers[1], 32'd100);
-    verify_register("x2 (64)",  dut.decode_stage_inst.register_file_inst.registers[2], 32'd64);
-    verify_register("x3 (100)", dut.decode_stage_inst.register_file_inst.registers[3], 32'd100);
-    verify_register("x4 (105)", dut.decode_stage_inst.register_file_inst.registers[4], 32'd105);
+    // Access internal signals of the DUT for verification
+    // These paths might need adjustment based on your specific hierarchy
+    verify_register("x1", dut.decode_stage_inst.register_file_inst.registers[1], 32'd10);
+    verify_register("x2", dut.decode_stage_inst.register_file_inst.registers[2], 32'd20);
+    verify_register("x3", dut.decode_stage_inst.register_file_inst.registers[3], 32'd30);
+    verify_register("x4", dut.decode_stage_inst.register_file_inst.registers[4], 32'd30);
+
+    // Verify data memory content at address 0
+    // The data_memory module is instantiated inside memory_stage
+    verify_memory("Data Memory[0]", dut.memory_stage_inst.data_mem_inst.memory[0], 32'd30);
 
     $display("\n===============================================");
-    $display("= Simulation Finished. Pausing for GUI.     =");
+    $display("= Simulation Finished.                          =");
     $display("===============================================");
-    #1000;
+    #100;
     $finish;
   end
 
-  // --- 검증용 태스크 ---
+  // --- Verification Tasks ---
   task verify_register(string name, logic [31:0] value, logic [31:0] expected);
     if (value === expected) begin
-      $display("[PASS] %s: Expected %0d, Got %0d", name, expected, value);
+      $display("[PASS] Register %s: Expected %0d (0x%h), Got %0d (0x%h)", name, expected, expected, value, value);
     end else begin
-      $error("[FAIL] %s: Expected %0d, Got %0d", name, expected, value);
+      $error("[FAIL] Register %s: Expected %0d (0x%h), Got %0d (0x%h)", name, expected, expected, value, value);
     end
   endtask
 
-  // --- 파형 덤프 (디버깅용) ---
+  task verify_memory(string name, logic [31:0] value, logic [31:0] expected);
+    if (value === expected) begin
+      $display("[PASS] %s: Expected %0d (0x%h), Got %0d (0x%h)", name, expected, expected, value, value);
+    end else begin
+      $error("[FAIL] %s: Expected %0d (0x%h), Got %0d (0x%h)", name, expected, expected, value, value);
+    end
+  endtask
+
+  // --- Waveform Dump (for debugging) ---
   initial begin
     $dumpfile("waveform.vcd");
     $dumpvars(0, tb_riscv_core);

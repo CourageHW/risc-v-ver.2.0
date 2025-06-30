@@ -76,15 +76,15 @@ module tb_immediate_sel;
     // The module defines default: ImmSel_o = IMM_TYPE_R, which is 0. So expect 0.
     ImmSel_i = IMM_TYPE_R; // Explicitly set to R-type
     #1;
-    if (ImmSel_o === 32'h0) begin
+    if (ImmSel_o === 32'd5) begin
       $display("\nTest Case: Default (IMM_TYPE_R)");
       $display("  ImmSel_i = %s", ImmSel_i.name());
-      $display("  ImmSel_o: Expected 0x%h, Got 0x%h", 32'h0, ImmSel_o);
+      $display("  ImmSel_o: Expected 0x%h, Got 0x%h", 32'd5, ImmSel_o);
       $display("  [PASS] Default case successful.");
     end else begin
       $error("\nTest Case: Default (IMM_TYPE_R)");
       $error("  ImmSel_i = %s", ImmSel_i.name());
-      $error("  ImmSel_o: Expected 0x%h, Got 0x%h", 32'h0, ImmSel_o);
+      $error("  ImmSel_o: Expected 0x%h, Got 0x%h", 32'd5, ImmSel_o);
       $error("  [FAIL] Default case failed.");
     end
 

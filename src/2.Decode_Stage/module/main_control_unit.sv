@@ -96,6 +96,7 @@ module main_control_unit (
                 WBSel_o    = WB_PC4;
                 RegWrite_o = 1'b1;
                 Jump_o     = 1'b1; // Jump 신호 활성화
+                ImmSel_o   = IMM_TYPE_I;
             end
 
             OPCODE_JALR: begin

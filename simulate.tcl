@@ -52,6 +52,7 @@ add_files -fileset sim_1 [list \
     ./testbench/1.Fetch_Stage/module/tb_pc_sel.sv \
     ./testbench/1.Fetch_Stage/module/tb_program_counter.sv \
     ./testbench/1.Fetch_Stage/module/tb_instruction_memory.sv \
+    ./testbench/1.Fetch_Stage/tb_fetch_stage.sv \
     ./testbench/2.Decode_Stage/module/tb_register_file.sv \
     ./testbench/2.Decode_Stage/module/tb_immediate_generator.sv \
     ./testbench/2.Decode_Stage/module/tb_branch_comparator.sv \
@@ -59,21 +60,25 @@ add_files -fileset sim_1 [list \
     ./testbench/2.Decode_Stage/module/tb_immediate_sel.sv \
     ./testbench/2.Decode_Stage/module/tb_main_control_unit.sv \
     ./testbench/2.Decode_Stage/module/tb_target_address_adder.sv \
+    ./testbench/2.Decode_Stage/tb_decode_stage.sv \
     ./testbench/3.Execute_Stage/module/tb_alu.sv \
     ./testbench/3.Execute_Stage/module/tb_alu_control_unit.sv \
     ./testbench/3.Execute_Stage/module/tb_MUX_3to1.sv \
+    ./testbench/3.Execute_Stage/tb_execute_stage.sv \
     ./testbench/4.Memory_Stage/module/tb_data_memory.sv \
+    ./testbench/4.Memory_Stage/tb_memory_stage.sv \
     ./testbench/5.WriteBack_Stage/module/tb_write_back_sel.sv \
+    ./testbench/5.WriteBack_Stage/tb_writeback_stage.sv \
     ./testbench/6.Forwarding_Unit/tb_forwarding_unit.sv \
     ./testbench/7.Hazard_Detection_Unit/tb_hazard_detection_unit.sv \
     ./testbench/tb_riscv_core.sv \
 ]
 
-add_files -fileset sim_1 -norecurse ./program.mem \
+add_files -fileset sim_1 -norecurse ./testbench/1.Fetch_Stage/module/tb_program.mem \
 
 # --- 3. Set Compile Order ---
 # Explicitly set the defines package to be compiled first.
-set_property top tb_hazard_detection_unit [get_filesets sim_1]
+set_property top tb_immediate_generator [get_filesets sim_1]
 update_compile_order -fileset sim_1
 
 

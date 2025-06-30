@@ -8,132 +8,152 @@ module tb_execute_stage;
   logic clk;
 
   // execute_stage 모듈의 입력 포트에 연결될 신호들
-  logic [DATA_WIDTH-1:0] EX_alu_operand1_i;
-  logic [DATA_WIDTH-1:0] EX_alu_operand2_i;
-  logic [2:0] EX_alu_ctrl_funct3_i;
-  logic EX_alu_ctrl_funct7_i;
+  logic [DATA_WIDTH-1:0] EX_rd_data1_i;
+  logic [DATA_WIDTH-1:0] EX_rd_data2_i;
+  logic [DATA_WIDTH-1:0] MEM_alu_result_i;
+  logic [DATA_WIDTH-1:0] WB_alu_result_i;
+  logic [DATA_WIDTH-1:0] EX_imm_i;
+  logic [DATA_WIDTH-1:0] EX_pc_i;
+  logic [DATA_WIDTH-1:0] EX_instruction_i;
+
+  logic EX_ALUOpSrc1_i;
+  logic EX_ALUOpSrc2_i;
   alu_op_e EX_ALUOp_i;
+  fw_sel_e EX_forwardA_i;
+  fw_sel_e EX_forwardB_i;
 
   // execute_stage 모듈의 출력 포트에서 받을 신호들
   logic [DATA_WIDTH-1:0] EX_alu_result_o;
-  logic EX_alu_zeroFlag_o;
+  logic [DATA_WIDTH-1:0] EX_wr_data_o;
 
   // DUT (Design Under Test): execute_stage 모듈 인스턴스화
   execute_stage dut (
-    .EX_alu_operand1_i(EX_alu_operand1_i),
-    .EX_alu_operand2_i(EX_alu_operand2_i),
-    .EX_alu_ctrl_funct3_i(EX_alu_ctrl_funct3_i),
-    .EX_alu_ctrl_funct7_i(EX_alu_ctrl_funct7_i),
+    .EX_rd_data1_i(EX_rd_data1_i),
+    .EX_rd_data2_i(EX_rd_data2_i),
+    .MEM_alu_result_i(MEM_alu_result_i),
+    .WB_alu_result_i(WB_alu_result_i),
+    .EX_imm_i(EX_imm_i),
+    .EX_pc_i(EX_pc_i),
+    .EX_instruction_i(EX_instruction_i),
+    .EX_ALUOpSrc1_i(EX_ALUOpSrc1_i),
+    .EX_ALUOpSrc2_i(EX_ALUOpSrc2_i),
     .EX_ALUOp_i(EX_ALUOp_i),
+    .EX_forwardA_i(EX_forwardA_i),
+    .EX_forwardB_i(EX_forwardB_i),
     .EX_alu_result_o(EX_alu_result_o),
-    .EX_alu_zeroFlag_o(EX_alu_zeroFlag_o)
+    .EX_wr_data_o(EX_wr_data_o)
   );
 
-  // 클럭 생성
+  // Clock generation
   initial begin
     clk = 0;
     forever #(CLK_PERIOD/2) clk = ~clk;
   end
 
-  // 테스트 케이스를 수행하는 task
+  // Test task
   task automatic test (
-    input alu_op_e      ALUOp_t,
-    input logic [2:0]   alu_ctrl_funct3_t,
-    input logic         alu_ctrl_funct7_t,
-    input logic [DATA_WIDTH-1:0] operand1_t, // ALU operand 1
-    input logic [DATA_WIDTH-1:0] operand2_t, // ALU operand 2
-    input logic [DATA_WIDTH-1:0] expected_result, // 예상되는 ALU 결과
-    input logic         expected_zeroFlag, // 예상되는 Zero Flag
-    input string        OperateName // 테스트 케이스 이름
+    input logic [DATA_WIDTH-1:0] rd_data1_t,
+    input logic [DATA_WIDTH-1:0] rd_data2_t,
+    input logic [DATA_WIDTH-1:0] mem_alu_t,
+    input logic [DATA_WIDTH-1:0] wb_alu_t,
+    input logic [DATA_WIDTH-1:0] imm_t,
+    input logic [DATA_WIDTH-1:0] pc_t,
+    input logic [DATA_WIDTH-1:0] instruction_t,
+    input logic alu_op_src1_t,
+    input logic alu_op_src2_t,
+    input alu_op_e alu_op_t,
+    input fw_sel_e forwardA_t,
+    input fw_sel_e forwardB_t,
+    input logic [DATA_WIDTH-1:0] expected_alu_result,
+    input logic [DATA_WIDTH-1:0] expected_wr_data,
+    input string test_name
     );
 
-    @(posedge clk); // 클럭 엣지 대기
-    #1; // 작은 지연 후 입력 인가
+    @(posedge clk); // Wait for clock edge
+    #1; // Small delay for inputs to settle
 
-    // DUT의 입력 신호에 값 할당
-    EX_ALUOp_i          = ALUOp_t;
-    EX_alu_ctrl_funct3_i = alu_ctrl_funct3_t;
-    EX_alu_ctrl_funct7_i = alu_ctrl_funct7_t;
-    EX_alu_operand1_i   = operand1_t;
-    EX_alu_operand2_i   = operand2_t;
+    // Assign inputs to DUT
+    EX_rd_data1_i      = rd_data1_t;
+    EX_rd_data2_i      = rd_data2_t;
+    MEM_alu_result_i   = mem_alu_t;
+    WB_alu_result_i    = wb_alu_t;
+    EX_imm_i           = imm_t;
+    EX_pc_i            = pc_t;
+    EX_instruction_i   = instruction_t;
+    EX_ALUOpSrc1_i     = alu_op_src1_t;
+    EX_ALUOpSrc2_i     = alu_op_src2_t;
+    EX_ALUOp_i         = alu_op_t;
+    EX_forwardA_i      = forwardA_t;
+    EX_forwardB_i      = forwardB_t;
 
-    @(posedge clk); // 다음 클럭 엣지 대기 (DUT가 연산을 수행할 시간)
-    #1; // 작은 지연 후 출력 값 확인 (조합 로직이므로 다음 클럭 엣지 후 안정화)
+    @(posedge clk); // Wait for next clock edge for combinational logic to propagate
+    #1; // Small delay for outputs to settle
 
-    // ALU 결과값 검증
-    assert(EX_alu_result_o == expected_result)
-      else $error("Mismatch result for %s: Expected ALU Result = %0d, Got = %0d at %0t",
-        OperateName, expected_result, EX_alu_result_o, $time);
-
-    // Zero Flag 검증
-    assert(EX_alu_zeroFlag_o == expected_zeroFlag)
-      else $error("Mismatch zeroFlag for %s: Expected Zero Flag = %0d, Got = %0d at %0t",
-        OperateName, expected_zeroFlag, EX_alu_zeroFlag_o, $time);
-
-    $display("[Pass] %s", OperateName);
+    // Verify outputs
+    if (EX_alu_result_o === expected_alu_result && EX_wr_data_o === expected_wr_data) begin
+      $display("  [PASS] %s", test_name);
+    end else begin
+      $error("  [FAIL] %s", test_name);
+      $display("    Expected ALU Result: 0x%h, Got: 0x%h", expected_alu_result, EX_alu_result_o);
+      $display("    Expected Write Data: 0x%h, Got: 0x%h", expected_wr_data, EX_wr_data_o);
+    end
   endtask
 
   initial begin
-    // 초기값 설정
-    EX_ALUOp_i          = ALUOP_NONE;
-    EX_alu_ctrl_funct3_i = '0;
-    EX_alu_ctrl_funct7_i = '0;
-    EX_alu_operand1_i   = '0;
-    EX_alu_operand2_i   = '0;
+    // Initialize all inputs to default safe values
+    EX_rd_data1_i      = '0;
+    EX_rd_data2_i      = '0;
+    MEM_alu_result_i   = '0;
+    WB_alu_result_i    = '0;
+    EX_imm_i           = '0;
+    EX_pc_i            = '0;
+    EX_instruction_i   = '0;
+    EX_ALUOpSrc1_i     = 0;
+    EX_ALUOpSrc2_i     = 0;
+    EX_ALUOp_i         = ALUOP_NONE;
+    EX_forwardA_i      = FW_NONE;
+    EX_forwardB_i      = FW_NONE;
 
-    @(posedge clk); // 초기 클럭 동기화
+    @(posedge clk); // Initial clock synchronization
 
-    $display("\n=======================");
-    $display("[Start] Execute Stage Test at %0t", $time);
-    $display("========================\n");
+    $display("===============================================");
+    $display("=  Starting Execute Stage Testbench           =");
+    $display("===============================================");
 
-    // --- Memory Address Calculations (ALU_ADD) ---
-    test(ALUOP_MEM_ADDR, 3'bxxx, 1'bx, 32'd100, 32'd20, 32'd120, 0, "MEM_ADDR_ADD");
+    // Test 1: Basic R-type ADD (no forwarding, no special ALUSrc)
+    test(32'd10, 32'd5, '0, '0, '0, '0, {29'b0, FUNCT7_ADD, 3'b000, 7'b0110011}, 0, 0, ALUOP_RTYPE, FW_NONE, FW_NONE, 32'd15, 32'd5, "Basic R-type ADD");
 
-    // --- Branch Operations (ALU_SUB) ---
-    test(ALUOP_BRANCH, 3'bxxx, 1'bx, 32'd50, 32'd50, 32'd0, 1, "BRANCH_EQ (Zero)");
-    test(ALUOP_BRANCH, 3'bxxx, 1'bx, 32'd50, 32'd40, 32'd10, 0, "BRANCH_NE (Non-Zero)");
+    // Test 2: I-type ADDI (no forwarding, ALUSrc2=1)
+    test(32'd20, '0, '0, '0, 32'd10, '0, {29'b0, 3'b000, 7'b0010011}, 0, 1, ALUOP_ITYPE_ARITH, FW_NONE, FW_NONE, 32'd30, 32'd10, "I-type ADDI");
 
-    // --- LUI (ALU_PASS_B) ---
-    // LUI는 operand1이 0이고 operand2가 Immediate (U-type)인 경우가 많음
-    test(ALUOP_LUI, 3'bxxx, 1'bx, 32'd0, 32'hABCD_0000, 32'hABCD_0000, 0, "LUI Pass B");
+    // Test 3: Load/Store Address Calculation (ALUSrc2=1)
+    test(32'd100, '0, '0, '0, 32'd4, '0, {29'b0, 3'b000, 7'b0000011}, 0, 1, ALUOP_MEM_ADDR, FW_NONE, FW_NONE, 32'd104, 32'd4, "Load/Store Address Calc");
 
-    // --- JUMP (ALU_ADD) ---
-    // JUMP는 보통 PC + offset (addi) 같은 연산
-    test(ALUOP_JUMP, 3'bxxx, 1'bx, 32'h1000, 32'd4, 32'h1004, 0, "JUMP_ADD (PC+4)");
+    // Test 4: Branch SUB (no forwarding, no special ALUSrc)
+    test(32'd50, 32'd50, '0, '0, '0, '0, {29'b0, 3'b000, 7'b1100011}, 0, 0, ALUOP_BRANCH, FW_NONE, FW_NONE, 32'd0, 32'd50, "Branch SUB (Equal)");
 
-    // --- R-Type Operations ---
-    // Assuming FUNCT7_ADD = 1'b0, FUNCT7_SUB = 1'b1
-    test(ALUOP_RTYPE, FUNCT3_ADD_SUB, FUNCT7_ADD, 32'd15, 32'd7, 32'd22, 0, "RTYPE ADD");
-    test(ALUOP_RTYPE, FUNCT3_ADD_SUB, FUNCT7_SUB, 32'd15, 32'd7, 32'd8,  0, "RTYPE SUB");
-    test(ALUOP_RTYPE, FUNCT3_SRL_SRA, FUNCT7_SRL, 32'd16, 32'd2, 32'd4,  0, "RTYPE SRL");
-    test(ALUOP_RTYPE, FUNCT3_SRL_SRA, FUNCT7_SRA, -32'sd16, 32'd2, -32'sd4, 0, "RTYPE SRA"); // SRA Negative Test
-    test(ALUOP_RTYPE, FUNCT3_SLL,     1'bx,       32'd5,  32'd3, 32'd40, 0, "RTYPE SLL");
-    test(ALUOP_RTYPE, FUNCT3_SLT,     1'bx,       32'd10, 32'd20, 32'd1, 0, "RTYPE SLT (true)");
-    test(ALUOP_RTYPE, FUNCT3_SLTU,    1'bx,       32'd10, 32'd20, 32'd1, 0, "RTYPE SLTU (true)");
-    test(ALUOP_RTYPE, FUNCT3_XOR,     1'bx,       32'd5,  32'd3, 32'd6,  0, "RTYPE XOR");
-    test(ALUOP_RTYPE, FUNCT3_OR,      1'bx,       32'd5,  32'd3, 32'd7,  0, "RTYPE OR");  // Add if ALU Control supports FUNCT3_OR for R-type
-    test(ALUOP_RTYPE, FUNCT3_AND,     1'bx,       32'd5,  32'd3, 32'd1,  0, "RTYPE AND"); // Add if ALU Control supports FUNCT3_AND for R-type
+    // Test 5: LUI (ALUSrc2=1, ALU_PASS_B)
+    test('0, '0, '0, '0, 32'hABCD_0000, '0, {29'b0, 7'b0110111}, 0, 1, ALUOP_LUI, FW_NONE, FW_NONE, 32'hABCD_0000, 32'hABCD_0000, "LUI Instruction");
 
+    // Test 6: JALR (ALUSrc1=0, ALUSrc2=1, ALU_ADD)
+    test(32'h1000, '0, '0, '0, 32'd8, 32'h0, {29'b0, 3'b000, 7'b1100111}, 0, 1, ALUOP_JUMP, FW_NONE, FW_NONE, 32'h1008, 32'd8, "JALR Instruction");
 
-    // --- I-Type Arithmetic Operations ---
-    // Assuming FUNCT7_SRL = 1'b0, FUNCT7_SRA = 1'b1
-    test(ALUOP_ITYPE_ARITH, FUNCT3_SRL_SRA, FUNCT7_SRL, 32'd32, 32'd3, 32'd4,  0, "ITYPE SRL");
-    test(ALUOP_ITYPE_ARITH, FUNCT3_SRL_SRA, FUNCT7_SRA, -32'sd32, 32'd3, -32'sd4, 0, "ITYPE SRA"); // SRAI Negative Test
-    test(ALUOP_ITYPE_ARITH, FUNCT3_ADD_SUB, 1'bx,       32'd10, 32'd5, 32'd15, 0, "ITYPE ADD (addi)");
-    test(ALUOP_ITYPE_ARITH, FUNCT3_SLL,     1'bx,       32'd6,  32'd2, 32'd24, 0, "ITYPE SLL (slli)");
-    test(ALUOP_ITYPE_ARITH, FUNCT3_SLT,     1'bx,       32'd10, 32'd5, 32'd0,  1, "ITYPE SLT (false)");
-    test(ALUOP_ITYPE_ARITH, FUNCT3_SLTU,    1'bx,       32'd5,  32'd10, 32'd1, 0, "ITYPE SLTU (true)");
-    test(ALUOP_ITYPE_ARITH, FUNCT3_XOR,     1'bx,       32'd7,  32'd2, 32'd5,  0, "ITYPE XOR (xori)");
-    test(ALUOP_ITYPE_ARITH, FUNCT3_OR,      1'bx,       32'd6,  32'd1, 32'd7,  0, "ITYPE OR (ori)"); // Add if ALU Control supports FUNCT3_OR for I-type
-    test(ALUOP_ITYPE_ARITH, FUNCT3_AND,     1'bx,       32'd7,  32'd3, 32'd3,  0, "ITYPE AND (andi)"); // Add if ALU Control supports FUNCT3_AND for I-type
+    // Test 7: AUIPC (ALUSrc1=1, ALUSrc2=1, ALU_ADD)
+    test('0, '0, '0, '0, 32'h1000, 32'h2000, {29'b0, 7'b0010111}, 1, 1, ALUOP_JUMP, FW_NONE, FW_NONE, 32'h3000, 32'h1000, "AUIPC Instruction");
 
+    // Test 8: Forwarding A from MEM_ALU
+    test(32'd10, 32'd5, 32'd99, '0, '0, '0, {29'b0, FUNCT7_ADD, 3'b000, 7'b0110011}, 0, 0, ALUOP_RTYPE, FW_MEM_ALU, FW_NONE, 32'd104, 32'd5, "Forward A from MEM_ALU"); // 99 + 5 = 104
 
+    // Test 9: Forwarding B from WB_DATA
+    test(32'd10, 32'd5, '0, 32'd88, '0, '0, {29'b0, FUNCT7_ADD, 3'b000, 7'b0110011}, 0, 0, ALUOP_RTYPE, FW_NONE, FW_WB_DATA, 32'd98, 32'd88, "Forward B from WB_DATA"); // 10 + 88 = 98
 
-    $display("\n==============================");
-    $display("[Success] Execute Stage Test Complete!");
-    $display("===============================\n");
-    repeat(10) @(posedge clk); // 시뮬레이션 종료 전 추가 대기
+    // Test 10: Forwarding A from WB_DATA and B from MEM_ALU
+    test(32'd10, 32'd5, 32'd77, 32'd66, '0, '0, {29'b0, FUNCT7_ADD, 3'b000, 7'b0110011}, 0, 0, ALUOP_RTYPE, FW_WB_DATA, FW_MEM_ALU, 32'd143, 32'd77, "Forward A from WB_DATA, B from MEM_ALU"); // 66 + 77 = 143
+
+    $display("===============================================");
+    $display("=  Execute Stage Test Complete!               =");
+    $display("===============================================");
+    repeat(10) @(posedge clk); // Additional delay before finishing
 
     $finish;
   end
