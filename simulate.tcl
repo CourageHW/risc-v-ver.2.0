@@ -74,11 +74,14 @@ add_files -fileset sim_1 [list \
     ./testbench/tb_riscv_core.sv \
 ]
 
-add_files -fileset sim_1 -norecurse ./testbench/1.Fetch_Stage/module/tb_program.mem \
+add_files -fileset sim_1 -norecurse [list \
+  ./program.mem \
+  ./testbench/1.Fetch_Stage/module/tb_program.mem \
+]
 
 # --- 3. Set Compile Order ---
 # Explicitly set the defines package to be compiled first.
-set_property top tb_immediate_generator [get_filesets sim_1]
+set_property top tb_riscv_core [get_filesets sim_1]
 update_compile_order -fileset sim_1
 
 

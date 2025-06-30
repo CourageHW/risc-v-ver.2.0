@@ -10,7 +10,7 @@ module instruction_memory (
     (* ram_style = "block" *) logic [DATA_WIDTH-1:0] inst_mem [0:INST_MEM_DEPTH-1];
 
     initial begin
-        $readmemh("tb_program.mem", inst_mem);
+        $readmemh("program.mem", inst_mem);
     end
 
     always_comb begin

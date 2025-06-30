@@ -28,7 +28,6 @@
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench/6.Forwarding_Unit
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench/7.Hazard_Detection_Unit
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench
-+incdir+/home/yonggi/Project_verilog/risc-v-ver.2/vivado_sim_project/riscv_simulation.sim/sim_1/behav/xsim
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/0.Pipeline_Register
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/1.Fetch_Stage
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/src/1.Fetch_Stage/module
@@ -58,4 +57,3 @@
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench/6.Forwarding_Unit
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench/7.Hazard_Detection_Unit
 +incdir+/home/yonggi/Project_verilog/risc-v-ver.2/testbench
-+incdir+/home/yonggi/Project_verilog/risc-v-ver.2/vivado_sim_project/riscv_simulation.sim/sim_1/behav/xsim
