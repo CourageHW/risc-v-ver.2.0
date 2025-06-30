@@ -5,6 +5,7 @@ import defines::*;
 module IF_to_ID (
   input logic clk,
   input logic rst_n,
+  input logic flush_i,
 
   input logic [DATA_WIDTH-1:0] IF_instruction_i,
   input logic [DATA_WIDTH-1:0] IF_pc_i,
@@ -16,7 +17,7 @@ module IF_to_ID (
   );
 
   always_ff @(posedge clk) begin
-    if (!rst_n) begin
+    if (!rst_n || flush_i) begin
       ID_instruction_o <= '0;
       ID_pc_o <= '0;
       ID_pc_plus4_o <= '0;

@@ -14,7 +14,7 @@ module data_memory (
 );
 
   // Use "reg" for memory inside a procedural block, which is more conventional.
-  (* ram_style = "block" *) reg [DATA_WIDTH-1:0] memory [0:DATA_MEM_DEPTH-1];
+  (* ram_style = "block" *) logic [DATA_WIDTH-1:0] memory [0:DATA_MEM_DEPTH-1];
 
   logic [DATA_MEM_ADDR_WIDTH-1:0] word_addr_w;
 

@@ -42,18 +42,16 @@ module tb_riscv_core;
     $display("--- Final Register State Verification ---");
     $display("-----------------------------------------------");
     
-    // Check if the values match the expected results from the new assembly program.
-    // The path to the register file might need adjustment based on your exact hierarchy.
-    // e.g., dut.decode_stage_inst.register_file_inst.rf[1]
-    verify_register("x1 (10)", dut.decode_stage_inst.register_file_inst.registers[1], 32'd10);
-    verify_register("x2 (10)", dut.decode_stage_inst.register_file_inst.registers[2], 32'd10);
+    verify_register("x1 (10)",          dut.decode_stage_inst.register_file_inst.registers[1], 32'd10);
+    verify_register("x2 (10)",          dut.decode_stage_inst.register_file_inst.registers[2], 32'd10);
     verify_register("x4 (should be 0)", dut.decode_stage_inst.register_file_inst.registers[4], 32'd0);
-    verify_register("x5 (100)", dut.decode_stage_inst.register_file_inst.registers[5], 32'd100);
+    verify_register("x5 (100)",         dut.decode_stage_inst.register_file_inst.registers[5], 32'd100);
 
     $display("\n===============================================");
     $display("= Simulation Finished =");
     $display("===============================================");
-    repeat(100) @(posedge clk);
+
+    #1000;
     $finish;
   end
 
@@ -65,4 +63,5 @@ module tb_riscv_core;
       $error("[FAIL] %s: Expected 0x%h, Got 0x%h", name, expected, value);
     end
   endtask
+
 endmodule

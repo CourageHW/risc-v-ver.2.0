@@ -33,7 +33,6 @@ module riscv_core (
   
   logic [4:0] WB_wr_addr_w;
   
-
   // =============================================== //
   //                   IF Stage                      //
   // =============================================== //
@@ -50,6 +49,7 @@ module riscv_core (
   IF_to_ID if_to_id_inst (
     .clk(clk),
     .rst_n(rst_n),
+    .flush_i(ID_PCSrc_w),
 
     .IF_instruction_i(IF_instruction_w),
     .IF_pc_i(IF_pc_w),

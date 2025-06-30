@@ -42,12 +42,7 @@ add_files -fileset sim_1 [list \
     ./src/5.WriteBack_Stage/module/write_back_sel.sv \
     ./src/5.WriteBack_Stage/writeback_stage.sv \
     ./src/riscv_core.sv \
-    ./testbench/2.Decode_Stage/module/tb_register_file.sv \
-    ./testbench/2.Decode_Stage/tb_decode_stage.sv \
     ./testbench/3.Execute_Stage/module/tb_alu.sv \
-    ./testbench/3.Execute_Stage/module/tb_alu_control_unit.sv \
-    ./testbench/3.Execute_Stage/tb_execute_stage.sv \
-    ./testbench/4.Memory_Stage/module/tb_data_memory.sv \
     ./testbench/tb_riscv_core.sv \
 ]
 
@@ -59,19 +54,22 @@ set_property top tb_riscv_core [get_filesets sim_1]
 update_compile_order -fileset sim_1
 
 
-# --- 4. Launch Simulation & Control ---
-# Check if the 'gui' argument was passed from the shell script
+# --- 4. Launch Simulation ---
+puts "INFO: Launching simulation..."
+launch_simulation
+
+# --- 5. Run Simulation ---
+puts "INFO: Running simulation until \$finish..."
+run -all
+
 if { $argc > 0 && [lindex $argv 0] == "gui" } {
-    # GUI Mode: Launch the simulation and open the GUI.
-    puts "INFO: GUI mode requested. Launching simulation with GUI."
-    launch_simulation -gui
-    run -all
-    # The GUI will remain open for analysis.
+    # '-gui' 옵션이 있으면, 파형 분석을 위해 GUI를 실행합니다.
+    puts "INFO: Simulation stopped. Opening waveform GUI..."
+    start_gui
+    # GUI 모드에서는 사용자가 직접 닫을 것이므로, 자동으로 종료하지 않습니다.
 } else {
-    # Batch Mode: Launch, run, and exit.
-    puts "INFO: Batch mode requested. Launching simulation without GUI."
-    launch_simulation
-    run -all
+    # '-gui' 옵션이 없으면 (기본 동작), 프로젝트를 닫고 종료합니다.
+    puts "INFO: Simulation finished. Closing project."
     close_project
     exit
 }

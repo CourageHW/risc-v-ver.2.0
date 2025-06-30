@@ -33,7 +33,7 @@ module fetch_stage (
   program_counter program_counter_inst (
     .clk(clk),
     .rst_n(rst_n),
-    .pc_en_i(),
+    .pc_en_i(1'b1),
     .pc_i(IF_pc_sel_w),
     .pc_o(IF_pc_w)
     );
@@ -47,7 +47,8 @@ module fetch_stage (
     .rd_addr_i(IF_rd_addr_w),
     .rd_data_o(IF_instruction_w)
   );
-
+  
+  assign IF_instruction_o = IF_instruction_w;
   assign IF_pc_plus4_o = IF_pc_plus4_w;
   assign IF_pc_o = IF_pc_w;
 endmodule

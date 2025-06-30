@@ -4,7 +4,7 @@ import defines::*;
 
 module pc_add (
   input logic [DATA_WIDTH-1:0] pc_i,
-  input logic [DATA_WIDTH-1:0] pc_o
+  output logic [DATA_WIDTH-1:0] pc_o
   );
 
   assign pc_o = pc_i + 32'd4;
