@@ -41,6 +41,7 @@ add_files -fileset sim_1 [list \
     ./src/4.Memory_Stage/memory_stage.sv \
     ./src/5.WriteBack_Stage/module/write_back_sel.sv \
     ./src/5.WriteBack_Stage/writeback_stage.sv \
+    ./src/6.Forwarding_Unit/forwarding_unit.sv \
     ./src/riscv_core.sv \
     ./testbench/3.Execute_Stage/module/tb_alu.sv \
     ./testbench/tb_riscv_core.sv \

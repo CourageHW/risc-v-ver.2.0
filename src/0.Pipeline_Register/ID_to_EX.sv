@@ -7,6 +7,8 @@ module ID_to_EX (
   input logic rst_n,
 
   input wb_sel_e ID_WBSel_i,
+  input fw_sel_e ID_forwardA_i,
+  input fw_sel_e ID_forwardB_i,
   input logic ID_MemRead_i,
   input logic ID_MemWrite_i,
   input logic ID_RegWrite_i,
@@ -22,6 +24,8 @@ module ID_to_EX (
   input logic [DATA_WIDTH-1:0] ID_pc_plus4_i,
 
   output wb_sel_e EX_WBSel_o,
+  output fw_sel_e EX_forwardA_o,
+  output fw_sel_e EX_forwardB_o,
   output logic EX_MemRead_o,
   output logic EX_MemWrite_o,
   output logic EX_RegWrite_o,
@@ -40,6 +44,8 @@ module ID_to_EX (
   always_ff @(posedge clk) begin
     if (!rst_n) begin
       EX_WBSel_o     <= WB_NONE;
+      EX_forwardA_o  <= FW_NONE;
+      EX_forwardB_o  <= FW_NONE;
       EX_MemRead_o   <= 0;
       EX_MemWrite_o  <= 0;
       EX_RegWrite_o  <= 0;
@@ -53,6 +59,8 @@ module ID_to_EX (
       EX_imm_o         <= '0;
     end else begin
       EX_WBSel_o     <= ID_WBSel_i;
+      EX_forwardA_o  <= ID_forwardA_i;
+      EX_forwardB_o  <= ID_forwardB_i;
       EX_MemRead_o   <= ID_MemRead_i;
       EX_MemWrite_o  <= ID_MemWrite_i;
       EX_RegWrite_o  <= ID_RegWrite_i;

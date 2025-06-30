@@ -10,6 +10,7 @@ module riscv_core (
 
   wb_sel_e ID_WBSel_w, EX_WBSel_w, MEM_WBSel_w, WB_WBSel_w;
   alu_op_e ID_ALUOp_w, EX_ALUOp_w;
+  fw_sel_e ID_forwardA_w, ID_forwardB_w, EX_forwardA_w, EX_forwardB_w;
   logic ID_MemRead_w, EX_MemRead_w, MEM_MemRead_w; 
   logic ID_MemWrite_w, EX_MemWrite_w, MEM_MemWrite_w; 
   logic ID_RegWrite_w, EX_RegWrite_w, MEM_RegWrite_w, WB_RegWrite_w;
@@ -25,14 +26,18 @@ module riscv_core (
   logic [DATA_WIDTH-1:0] IF_pc_w, ID_pc_w, EX_pc_w;
   logic [DATA_WIDTH-1:0] IF_pc_plus4_w, ID_pc_plus4_w, EX_pc_plus4_w, MEM_pc_plus4_w, WB_pc_plus4_w;
   logic [DATA_WIDTH-1:0] EX_alu_result_w, MEM_alu_result_w, WB_alu_result_w;
-  logic [DATA_WIDTH-1:0] MEM_rd_addr_w;
+  logic [DATA_WIDTH-1:0] MEM_rd_mem_addr_w;
   logic [DATA_WIDTH-1:0] MEM_rd_data2_w;
   logic [DATA_WIDTH-1:0] MEM_wr_data_w;
   logic [DATA_WIDTH-1:0] MEM_rd_data_w, WB_rd_data_w;
   logic [DATA_WIDTH-1:0] WB_writeback_data_w;
   
+  logic [4:0] ID_rs1_addr_w, ID_rs2_addr_w;
+  logic [4:0] EX_rd_addr_w, MEM_rd_addr_w;
+
   logic [4:0] WB_wr_addr_w;
   
+
   // =============================================== //
   //                   IF Stage                      //
   // =============================================== //
@@ -67,8 +72,8 @@ module riscv_core (
 
   decode_stage decode_stage_inst (
     // --- 입력 포트 ---
-    .clk(clk),                      // 공통 클럭
-    .rst_n(rst_n),                  // 공통 리셋
+    .clk(clk),
+    .rst_n(rst_n),
     .ID_instruction_i(ID_instruction_w), // IF/ID 파이프라인 레지스터로부터 온 명령어
     .ID_pc_i(ID_pc_w),
     .WB_we_i(WB_RegWrite_w),
@@ -101,6 +106,8 @@ module riscv_core (
 
     // --- 입력 (Decode Stage의 출력) ---
     .ID_WBSel_i(ID_WBSel_w),
+    .ID_forwardA_i(ID_forwardA_w),
+    .ID_forwardB_i(ID_forwardB_w),
     .ID_MemRead_i(ID_MemRead_w),
     .ID_MemWrite_i(ID_MemWrite_w),
     .ID_RegWrite_i(ID_RegWrite_w),
@@ -116,6 +123,8 @@ module riscv_core (
 
     // --- 출력 (Execute Stage로 전달) ---
     .EX_WBSel_o(EX_WBSel_w),
+    .EX_forwardA_o(EX_forwardA_w),
+    .EX_forwardB_o(EX_forwardB_w),
     .EX_MemRead_o(EX_MemRead_w),
     .EX_MemWrite_o(EX_MemWrite_w),
     .EX_RegWrite_o(EX_RegWrite_w),
@@ -147,8 +156,8 @@ module riscv_core (
     .EX_ALUOpSrc1_i(EX_ALUOpSrc1_w),
     .EX_ALUOpSrc2_i(EX_ALUOpSrc2_w),
     .EX_ALUOp_i(EX_ALUOp_w),
-    .EX_forwardA_i(FW_NONE), // 임시
-    .EX_forwardB_i(FW_NONE), // 임시
+    .EX_forwardA_i(EX_forwardA_w),
+    .EX_forwardB_i(EX_forwardB_w),
 
     .EX_alu_result_o(EX_alu_result_w)
     );
@@ -184,7 +193,7 @@ module riscv_core (
   //                   MEM Stage                     //
   // =============================================== //
 
-  assign MEM_rd_addr_w = MEM_alu_result_w;
+  assign MEM_rd_mem_addr_w = MEM_alu_result_w;
   assign MEM_wr_data_w = MEM_rd_data2_w;
  
   memory_stage memory_stage_inst (
@@ -192,7 +201,7 @@ module riscv_core (
     .MEM_MemWrite_i(MEM_MemWrite_w),
     .MEM_MemRead_i(MEM_MemRead_w),
     .MEM_instruction_i(MEM_instruction_w),
-    .MEM_rd_addr_i(MEM_rd_addr_w),
+    .MEM_rd_addr_i(MEM_rd_mem_addr_w),
     .MEM_wr_data_i(MEM_wr_data_w),
     .MEM_rd_data_o(MEM_rd_data_w)
     );
@@ -233,4 +242,24 @@ module riscv_core (
     .WB_writeback_data_o(WB_writeback_data_w)
   );
 
+  // =============================================== //
+  //                Forwarding Unit                  //
+  // =============================================== //
+  
+  assign ID_rs1_addr_w = ID_instruction_w[19:15];
+  assign ID_rs2_addr_w = ID_instruction_w[24:20];
+  assign EX_rd_addr_w = EX_instruction_w[11:7];
+  assign MEM_rd_addr_w = MEM_instruction_w[11:7];
+
+  forwarding_unit forwarding_unit_inst (
+    .ID_rs1_addr_i(ID_rs1_addr_w),
+    .ID_rs2_addr_i(ID_rs2_addr_w),
+    .EX_rd_addr_i(EX_rd_addr_w),
+    .MEM_rd_addr_i(MEM_rd_addr_w),
+    .EX_RegWrite_i(EX_RegWrite_w),
+    .MEM_RegWrite_i(MEM_RegWrite_w),
+
+    .forwardA(ID_forwardA_w),
+    .forwardB(ID_forwardB_w)
+  );
 endmodule
